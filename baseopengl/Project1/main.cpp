@@ -24,13 +24,13 @@ float mix_value = 0;
 
 int main()
 {
-
+	float screenWidth=800, screenHeight=600;
 
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow* window = glfwCreateWindow(800, 600, "MINDOL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "MINDOL", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Window 생성 실패\n";
@@ -138,12 +138,25 @@ int main()
 		//float timeValue = glfwGetTime();//glfwGetTime은  GLFW가 초기화된 이후부터의 시간  '초'단위로 반환
 		//float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		//TriangleShader.setFloat4("unicolor", 0.0f, greenValue, 0.0f, 1.0f);
-		glm::mat4 trans = glm::mat4(1.0f);
-		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::mat4 model;
+		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-		unsigned int transformloc = glGetUniformLocation(TriangleShader.ID, "transform");
-		glUniformMatrix4fv(transformloc, 1, GL_FALSE, glm::value_ptr(trans));
+		glm::mat4 view;
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+		glm::mat4 projection;
+		projection = glm::perspective(glm::radians(45.0f), screenWidth / screenHeight, 0.1f, 100.0f);
+		
+
+		unsigned int modelloc = glGetUniformLocation(TriangleShader.ID, "model");
+		glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+
+		modelloc = glGetUniformLocation(TriangleShader.ID, "view");
+		glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(view));
+
+		modelloc = glGetUniformLocation(TriangleShader.ID, "projection");
+		glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(projection));
+
 
 		//텍스쳐 사용
 		glActiveTexture(GL_TEXTURE0);
