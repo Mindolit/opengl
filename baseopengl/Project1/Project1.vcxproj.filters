@@ -29,12 +29,21 @@
     <ClInclude Include="stb_image.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Triangle.frag">
+    <None Include="light.frag">
       <Filter>소스 파일</Filter>
     </None>
-    <None Include="Triangle.vert">
+    <None Include="light.vert">
+      <Filter>소스 파일</Filter>
+    </None>
+    <None Include="lightcube.vert">
+      <Filter>소스 파일</Filter>
+    </None>
+    <None Include="lightcube.frag">
       <Filter>소스 파일</Filter>
     </None>
   </ItemGroup>
