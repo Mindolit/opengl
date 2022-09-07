@@ -155,7 +155,18 @@ int main()
 	TriangleShader.setInt("pepeTexture", 0);
 	TriangleShader.setInt("wallTexture", 1);
 	TriangleShader.setFloat("mix_value", mix_value);
-
+	glm::vec3 cubePositions[] = {
+	glm::vec3(0.0f,  0.0f,  0.0f),
+	glm::vec3(2.0f,  5.0f, -15.0f),
+	glm::vec3(-1.5f, -2.2f, -2.5f),
+	glm::vec3(-3.8f, -2.0f, -12.3f),
+	glm::vec3(2.4f, -0.4f, -3.5f),
+	glm::vec3(-1.7f,  3.0f, -7.5f),
+	glm::vec3(1.3f, -2.0f, -2.5f),
+	glm::vec3(1.5f,  2.0f, -2.5f),
+	glm::vec3(1.5f,  0.2f, -1.5f),
+	glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
 
 	
 	glEnable(GL_DEPTH_TEST);
@@ -172,24 +183,31 @@ int main()
 		//float timeValue = glfwGetTime();//glfwGetTime은  GLFW가 초기화된 이후부터의 시간  '초'단위로 반환
 		//float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		//TriangleShader.setFloat4("unicolor", 0.0f, greenValue, 0.0f, 1.0f);
-		glm::mat4 model;
-		model = glm::rotate(model, (float)glfwGetTime()*glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+		
 
 		glm::mat4 view;
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
 
 		glm::mat4 projection;
 		projection = glm::perspective(glm::radians(45.0f), screenWidth / screenHeight, 0.1f, 100.0f);
 		
+		TriangleShader.setMat4("view", view);
+		TriangleShader.setMat4("projection", projection);
+		for (int i = 0; i < 10; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
 
-		unsigned int modelloc = glGetUniformLocation(TriangleShader.ID, "model");
-		glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+			model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
 
-		modelloc = glGetUniformLocation(TriangleShader.ID, "view");
-		glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(view));
+			TriangleShader.setMat4("model", model);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
-		modelloc = glGetUniformLocation(TriangleShader.ID, "projection");
-		glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(projection));
+
+	
+
 
 
 		//텍스쳐 사용
