@@ -11,9 +11,10 @@ void framebuffer_size_callback(GLFWwindow* window, int widht, int height);
 void processInput(GLFWwindow* window);
 float vertices[] = {
 	// positions         // colors           //Texture 좌표
-	  -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f,0.0f,  // bottom right
-	 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 2.0f,0.0f , // bottom left
-	  0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f,2.0f  // top 
+     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.55f, 0.55f,   // top right
+	 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.55f, 0.45f,   // bottom right
+	-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.45f, 0.45f,   // bottom left
+	-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.45f, 0.55f    // top left 
 	  // x ,y,z  , r,g,b
 };
 
@@ -42,14 +43,21 @@ int main()
 		return -1;
 	}
 
-
-	unsigned int VAO, VBO;
+	unsigned int indices[] = {
+	   0, 1, 3, // first triangle
+	   1, 2, 3  // second triangle
+	};
+	unsigned int VAO, VBO,EBO;
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
+
 	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	//pointer 지정
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -63,10 +71,10 @@ int main()
 	unsigned int pepeTexture;
 	glGenTextures(1, &pepeTexture); //gl 텍스쳐 생성
 	glBindTexture(GL_TEXTURE_2D, pepeTexture);//텍스쳐 바인딩, 이제부터 Texture관련은 바인딩된 texture의 적용된다.
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//S축 랩핑 하는데 REPEAT형식으로 랩핑
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//T축 랩핑 하는데 REPEAT형식으로 랩핑
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);//MIP MAP 필터링 설정
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);//S축 랩핑 하는데 REPEAT형식으로 랩핑
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);//T축 랩핑 하는데 REPEAT형식으로 랩핑
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//MIP MAP 필터링 설정
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	stbi_set_flip_vertically_on_load(true);
 
 	int width, height, nrChannels;
@@ -90,8 +98,8 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);// S-AXIS WRAP
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);// T-AXIS WRAP
 	//filetering
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	data = stbi_load("resource/wall.jpg", &width, &height, &nrChannels, 0);
 	if (data)
 	{
@@ -134,7 +142,7 @@ int main()
 		//렌더링부분
 		TriangleShader.use();
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		//버퍼 스왑하고 io이벤트 체크
 		glfwSwapBuffers(window);
