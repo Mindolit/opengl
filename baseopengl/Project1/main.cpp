@@ -7,7 +7,7 @@
 
 
 void framebuffer_size_callback(GLFWwindow* window, int widht, int height);
-
+void processInput(GLFWwindow* window);
 float vertices[] = {
 	-0.5f, -0.5f, 0.0f,
 	 0.5f, -0.5f, 0.0f,
@@ -51,16 +51,31 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	Shader TraiangleShader("Triangle.vert", "Triangle.frag");
+	Shader TriangleShader("Triangle.vert", "Triangle.frag");
 
 
 
 	//렌더 루프
 	while (!glfwWindowShouldClose(window))
 	{
-		TraiangleShader.use();
+		processInput(window);
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		//삼각형 그리기위한 쉐이더를 현재부터 사용하겠다.
+		TriangleShader.use();
+
+		//삼각형을 그리기위한 쉐이더중 fragment shader의 Uniform 설정
+		float timeValue = glfwGetTime();//glfwGetTime은  GLFW가 초기화된 이후부터의 시간  '초'단위로 반환
+		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+		TriangleShader.setFloat4("unicolor", 0.0f, greenValue, 0.0f, 1.0f);
+
+
+		//렌더링부분
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		//버퍼 스왑하고 io이벤트 체크
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -71,4 +86,12 @@ int main()
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+}
+
+void processInput(GLFWwindow* window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	{
+		glfwSetWindowShouldClose(window, true); //glfw window를 꺼라 
+	}
 }
