@@ -1,7 +1,9 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include<iostream>
-
+#include<glm/glm.hpp>
+#include<glm/gtc/matrix_transform.hpp>
+#include<glm/gtc/type_ptr.hpp>
 //사용자정의 Header
 #include"SHADER.h"
 #define STB_IMAGE_IMPLEMENTATION
@@ -22,6 +24,8 @@ float mix_value = 0;
 
 int main()
 {
+
+
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -118,6 +122,9 @@ int main()
 	TriangleShader.setInt("wallTexture", 1);
 	TriangleShader.setFloat("mix_value", mix_value);
 
+
+	
+
 	//렌더 루프
 	while (!glfwWindowShouldClose(window))
 	{
@@ -131,7 +138,12 @@ int main()
 		//float timeValue = glfwGetTime();//glfwGetTime은  GLFW가 초기화된 이후부터의 시간  '초'단위로 반환
 		//float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		//TriangleShader.setFloat4("unicolor", 0.0f, greenValue, 0.0f, 1.0f);
+		glm::mat4 trans = glm::mat4(1.0f);
+		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
+		unsigned int transformloc = glGetUniformLocation(TriangleShader.ID, "transform");
+		glUniformMatrix4fv(transformloc, 1, GL_FALSE, glm::value_ptr(trans));
 
 		//텍스쳐 사용
 		glActiveTexture(GL_TEXTURE0);
