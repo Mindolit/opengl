@@ -11,9 +11,9 @@ void framebuffer_size_callback(GLFWwindow* window, int widht, int height);
 void processInput(GLFWwindow* window);
 float vertices[] = {
 	// positions         // colors           //Texture 좌표
-	  -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 0.5f,1.0f,  // bottom right
-	 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 0.0f,0.0f , // bottom left
-	  0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f,0.0f  // top 
+	  -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f,0.0f,  // bottom right
+	 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 1.0f,0.0f , // bottom left
+	  0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 0.5f,1.0f  // top 
 	  // x ,y,z  , r,g,b
 };
 
@@ -59,17 +59,18 @@ int main()
 	glEnableVertexAttribArray(2);
 	Shader TriangleShader("Triangle.vert", "Triangle.frag");
 
-	//Texture Generating start
-	unsigned int texture;
-	glGenTextures(1, &texture); //gl 텍스쳐 생성
-	glBindTexture(GL_TEXTURE_2D, texture);//텍스쳐 바인딩, 이제부터 Texture관련은 바인딩된 texture의 적용된다.
+	//Texture Generating start pepe
+	unsigned int pepeTexture;
+	glGenTextures(1, &pepeTexture); //gl 텍스쳐 생성
+	glBindTexture(GL_TEXTURE_2D, pepeTexture);//텍스쳐 바인딩, 이제부터 Texture관련은 바인딩된 texture의 적용된다.
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//S축 랩핑 하는데 REPEAT형식으로 랩핑
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//T축 랩핑 하는데 REPEAT형식으로 랩핑
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);//MIP MAP 필터링 설정
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	stbi_set_flip_vertically_on_load(true);
 
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("resource/wall.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load("resource/pepe.jfif", &width, &height, &nrChannels, 0);
 	if (data)//데이터 불러오기 성공했다면
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -81,8 +82,31 @@ int main()
 	}
 
 	stbi_image_free(data);//로드한 데이터를 적용했기 때문에 메모리 해제
+	
+	//Texture Genrating start wall;
+	unsigned int  wallTexture;
+	glGenTextures(1, &wallTexture);
+	glBindTexture(GL_TEXTURE_2D, wallTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);// S-AXIS WRAP
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);// T-AXIS WRAP
+	//filetering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	data = stbi_load("resource/wall.jpg", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "텍스쳐 2번째 데이터 불러오기 실패\n";
+	}
+	stbi_image_free(data);
 
-
+	TriangleShader.use();
+	TriangleShader.setInt("pepeTexture", 0);
+	TriangleShader.setInt("wallTexture", 1);
 
 
 	//렌더 루프
@@ -93,19 +117,22 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		//삼각형 그리기위한 쉐이더를 현재부터 사용하겠다.
-		TriangleShader.use();
 
 		//삼각형을 그리기위한 쉐이더중 fragment shader의 Uniform 설정
-		float timeValue = glfwGetTime();//glfwGetTime은  GLFW가 초기화된 이후부터의 시간  '초'단위로 반환
-		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		TriangleShader.setFloat4("unicolor", 0.0f, greenValue, 0.0f, 1.0f);
+		//float timeValue = glfwGetTime();//glfwGetTime은  GLFW가 초기화된 이후부터의 시간  '초'단위로 반환
+		//float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+		//TriangleShader.setFloat4("unicolor", 0.0f, greenValue, 0.0f, 1.0f);
 
 
 		//텍스쳐 사용
-		glBindTexture(GL_TEXTURE_2D, texture);
-
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, pepeTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, wallTexture);
+		
 
 		//렌더링부분
+		TriangleShader.use();
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 

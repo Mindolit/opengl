@@ -3,10 +3,11 @@ out vec4 FragColor;
 in vec3 outColor;
 in vec2 TexCoord;
 
-uniform sampler2D ourTexture;
+uniform sampler2D pepeTexture;
+uniform sampler2D wallTexture;
 
 void main()
 {
-  FragColor=texture(ourTexture,TexCoord)*vec4(outColor,1.0);
+	FragColor=mix(texture(pepeTexture,TexCoord),texture(wallTexture,TexCoord),0.5);	
   //texture(유니폼 텍스쳐데이터,텍스쳐 좌표);
 }
