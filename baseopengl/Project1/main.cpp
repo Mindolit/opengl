@@ -12,8 +12,8 @@ void processInput(GLFWwindow* window);
 float vertices[] = {
 	// positions         // colors           //Texture ÁÂÇ¥
 	  -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f,0.0f,  // bottom right
-	 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 1.0f,0.0f , // bottom left
-	  0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 0.5f,1.0f  // top 
+	 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 2.0f,0.0f , // bottom left
+	  0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f,2.0f  // top 
 	  // x ,y,z  , r,g,b
 };
 

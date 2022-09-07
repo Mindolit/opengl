@@ -8,6 +8,6 @@ uniform sampler2D wallTexture;
 
 void main()
 {
-	FragColor=mix(texture(pepeTexture,-TexCoord),texture(wallTexture,TexCoord),0.5);	
+	FragColor=mix(texture(pepeTexture,TexCoord),texture(wallTexture,TexCoord),0.5);	
   //texture(유니폼 텍스쳐데이터,텍스쳐 좌표);
 }
