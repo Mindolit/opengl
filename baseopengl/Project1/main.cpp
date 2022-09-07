@@ -11,13 +11,14 @@ void framebuffer_size_callback(GLFWwindow* window, int widht, int height);
 void processInput(GLFWwindow* window);
 float vertices[] = {
 	// positions         // colors           //Texture 좌표
-     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.55f, 0.55f,   // top right
-	 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.55f, 0.45f,   // bottom right
-	-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.45f, 0.45f,   // bottom left
-	-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.45f, 0.55f    // top left 
+     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,   // top right
+	 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+	-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+	-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
 	  // x ,y,z  , r,g,b
 };
 
+float mix_value = 0;
 
 int main()
 {
@@ -115,7 +116,7 @@ int main()
 	TriangleShader.use();
 	TriangleShader.setInt("pepeTexture", 0);
 	TriangleShader.setInt("wallTexture", 1);
-
+	TriangleShader.setFloat("mix_value", mix_value);
 
 	//렌더 루프
 	while (!glfwWindowShouldClose(window))
@@ -143,7 +144,7 @@ int main()
 		TriangleShader.use();
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
+		TriangleShader.setFloat("mix_value", mix_value);
 		//버퍼 스왑하고 io이벤트 체크
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -162,5 +163,17 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true); //glfw window를 꺼라 
+	}
+	else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		if(mix_value<=1.0)
+		mix_value+=0.001;
+		std::cout << mix_value << std::endl;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		if(mix_value>=0.0)
+		mix_value -= 0.001;
+		std::cout << mix_value << std::endl;
 	}
 }
