@@ -10,9 +10,9 @@ void framebuffer_size_callback(GLFWwindow* window, int widht, int height);
 void processInput(GLFWwindow* window);
 float vertices[] = {
 	// positions         // colors
-	  -0.5f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
-	 0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
-	  0.0f,  -0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
+		0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+	-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+	 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
 	  // x ,y,z  , r,g,b
 };
 
@@ -74,6 +74,9 @@ int main()
 		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		TriangleShader.setFloat4("unicolor", 0.0f, greenValue, 0.0f, 1.0f);
 
+
+		//»ï°¢Çü vertex shader offset ¼³Á¤
+		TriangleShader.setFloat4("horizontal_offset", 0.5f, 0.0f, 0.0f, 0.0f);
 
 		//·»´õ¸µºÎºÐ
 		glBindVertexArray(VAO);
