@@ -76,7 +76,7 @@ int main()
 
 
 		//»ï°¢Çü vertex shader offset ¼³Á¤
-		TriangleShader.setFloat4("horizontal_offset", 0.5f, 0.0f, 0.0f, 0.0f);
+		//TriangleShader.setFloat4("horizontal_offset", 0.5f, 0.0f, 0.0f, 0.0f);
 
 		//·»´õ¸µºÎºÐ
 		glBindVertexArray(VAO);
