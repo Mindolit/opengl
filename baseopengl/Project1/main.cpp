@@ -11,6 +11,10 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int widht, int height);
 void processInput(GLFWwindow* window);
+
+glm::vec3 camerapos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float vertices[] = {
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -185,15 +189,9 @@ int main()
 		//TriangleShader.setFloat4("unicolor", 0.0f, greenValue, 0.0f, 1.0f);
 		
 
-		const float radius = 10.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
+	
 		glm::mat4 view;
-		view = glm::lookAt(glm::vec3(camX, 0.0, camZ),
-			glm::vec3(0, 0, 0),
-			glm::vec3(0.0, 1.0, 0.0)
-		);
-
+		view = glm::lookAt(camerapos, camerapos + cameraFront, cameraUp);
 
 
 		glm::mat4 projection;
@@ -249,20 +247,38 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void processInput(GLFWwindow* window)
 {
+	const float cameraSpeed = 0.05f; 
+
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true); //glfw window¸¦ ²¨¶ó 
 	}
-	else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 	{
 		if(mix_value<=1.0)
 		mix_value+=0.001;
 		std::cout << mix_value << std::endl;
 	}
-	else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
 		if(mix_value>=0.0)
 		mix_value -= 0.001;
 		std::cout << mix_value << std::endl;
+	}
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		camerapos += cameraSpeed * cameraFront;
+	}
+	 if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		camerapos -= cameraSpeed * cameraFront;
+	}
+	 if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		camerapos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	}
+	 if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		camerapos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
 }
