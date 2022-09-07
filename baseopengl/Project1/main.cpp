@@ -11,7 +11,8 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int widht, int height);
 void processInput(GLFWwindow* window);
-
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 glm::vec3 camerapos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -58,9 +59,15 @@ float vertices[] = {
 	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
-
+//camera setting
 float mix_value = 0;
-
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+//mouse setting
+float lastX = 400, lastY = 300;
+float pitch=0.0f, yaw=-90.0f;
+bool firstMouse = true;
+float fov = 45.0f;
 int main()
 {
 	float screenWidth=800, screenHeight=600;
@@ -79,7 +86,9 @@ int main()
 	//callback 함수를 통해 window의 viewport 설정
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	//GLAD설정
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -178,6 +187,11 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
+
+
+		float currentTime = glfwGetTime();
+		deltaTime = currentTime - lastFrame;
+		lastFrame = currentTime;
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
@@ -191,11 +205,16 @@ int main()
 
 	
 		glm::mat4 view;
+		glm::vec3 direction;
+		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		direction.y = sin(glm::radians(pitch));
+		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		cameraFront = glm::normalize(direction);
 		view = glm::lookAt(camerapos, camerapos + cameraFront, cameraUp);
 
 
 		glm::mat4 projection;
-		projection = glm::perspective(glm::radians(45.0f), screenWidth / screenHeight, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(fov), screenWidth / screenHeight, 0.1f, 100.0f);
 		
 		TriangleShader.setMat4("view", view);
 		TriangleShader.setMat4("projection", projection);
@@ -245,10 +264,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+
+
 void processInput(GLFWwindow* window)
 {
-	const float cameraSpeed = 0.05f; 
-
+	float cameraSpeed = 2.5f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true); //glfw window를 꺼라 
@@ -281,4 +301,40 @@ void processInput(GLFWwindow* window)
 	{
 		camerapos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
+}
+
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+	
+	const float sensitivity = 0.1f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	fov -= (float)yoffset;
+	if (fov < 1.0f)
+		fov = 1.0f;
+	if (fov > 45.0f)
+		fov = 45.0f;
 }
