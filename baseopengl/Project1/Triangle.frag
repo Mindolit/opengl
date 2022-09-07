@@ -7,6 +7,6 @@ uniform sampler2D ourTexture;
 
 void main()
 {
-  FragColor=texture(ourTexture,TexCoord);
+  FragColor=texture(ourTexture,TexCoord)*vec4(outColor,1.0);
   //texture(유니폼 텍스쳐데이터,텍스쳐 좌표);
 }
