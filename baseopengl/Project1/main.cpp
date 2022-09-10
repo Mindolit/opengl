@@ -161,6 +161,7 @@ int main()
 		cube.use();
 		cube.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
 		cube.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		cube.setVec3("light.direction", 0, -3, 0);
 		cube.setVec3("lightPos", lightPos);
 		cube.setVec3("viewPos", camera.Position);
 
