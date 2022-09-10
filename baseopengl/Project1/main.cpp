@@ -113,6 +113,20 @@ int main()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
+
+	unsigned int VBO2, cubeVAO2;
+	glGenVertexArrays(1, &cubeVAO2);
+	glGenBuffers(1, &VBO2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindVertexArray(cubeVAO2);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+
 	unsigned int lightCubeVAO;
 	glGenVertexArrays(1, &lightCubeVAO);
 	glBindVertexArray(lightCubeVAO);
@@ -157,7 +171,31 @@ int main()
 		glm::mat4 model = glm::mat4(1.0f);
 		cube.setMat4("model", model);
 		
+		cube.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+		cube.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+		cube.setFloat("material.shininess", 128.0f);
+
+
+
 		glBindVertexArray(cubeVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		cube.setVec3("objectColor", 1.0f, 0.0f, 1.0f);
+		cube.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		cube.setVec3("lightPos", lightPos);
+		cube.setVec3("viewPos", camera.Position);
+		projection = glm::perspective(glm::radians(camera.Zoom), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+		view = camera.GetViewMatrix();
+		cube.setMat4("projection", projection);
+		cube.setMat4("view", view);
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(2, -1, 1));
+		cube.setMat4("model", model);
+		cube.setVec3("material.ambient", 0.2f, 0.0f, 0.2f);
+		cube.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+		cube.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+		cube.setFloat("material.shininess", 128.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
