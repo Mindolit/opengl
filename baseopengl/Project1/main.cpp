@@ -163,6 +163,11 @@ int main()
 		cube.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		cube.setVec3("lightPos", lightPos);
 		cube.setVec3("viewPos", camera.Position);
+
+		cube.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);
+		cube.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+		cube.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 		cube.setMat4("projection", projection);
