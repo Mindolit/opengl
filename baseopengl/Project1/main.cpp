@@ -140,12 +140,15 @@ int main()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
+		
+
 		glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		cube.use();
 		cube.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
 		cube.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		cube.setVec3("lightPos", lightPos.x,lightPos.y,lightPos.z);
+		cube.setVec3("lightPos", lightPos);
+		cube.setVec3("viewPos", camera.Position);
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 		cube.setMat4("projection", projection);
