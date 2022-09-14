@@ -13,7 +13,7 @@ void framebuffer_size_callback(GLFWwindow* window, int widht, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-unsigned int loadTexture(char const* path);
+unsigned int loadTexture(char const* path,bool gammacollection);
 glm::vec3 camerapos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -26,6 +26,11 @@ float lastFrame = 0.0f;
 
 bool blinn = 0;
 bool bilnnkeyPress = false;
+bool gammaEnabled = false;
+bool gammaKeyPressed = false;
+
+
+
 //mouse setting
 float lastX = 400, lastY = 300;
 float pitch=0.0f, yaw=-90.0f;
@@ -87,18 +92,30 @@ int main()
 
 	glBindVertexArray(0);
 
-	unsigned int floor = loadTexture("resource/get.png");
+	unsigned int floor = loadTexture("resource/get.png",false);
+	unsigned int floorTextureGammaCorrected = loadTexture("resource/get.png", true);
 
 
-
-	
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	Shader cube("light.vert", "light.frag");
 	cube.use();
-	cube.setInt("texture1", 0);
+	cube.setInt("floorTexture", 0);
 
-	glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
-
+	glm::vec3 lightPositions[] = {
+		glm::vec3(-3.0f, 0.0f, 0.0f),
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(3.0f, 0.0f, 0.0f)
+	};
+	glm::vec3 lightColors[] = {
+		glm::vec3(0.25),
+		glm::vec3(0.50),
+		glm::vec3(0.75),
+		glm::vec3(1.00)
+	};
 
 	glEnable(GL_DEPTH_TEST);
 	//렌더 루프
@@ -121,26 +138,18 @@ int main()
 		cube.setMat4("view", view);
 
 		//라이트 관련 설정
+		glUniform3fv(glGetUniformLocation(cube.ID, "lightPositions"), 4, &lightPositions[0][0]);
+		glUniform3fv(glGetUniformLocation(cube.ID, "lightColors"), 4, &lightColors[0][0]);
 		cube.setVec3("viewPos", camera.Position);
-		cube.setVec3("lightPos", lightPos);
-		cube.setInt("is_blinn", blinn);
-
+		cube.setInt("gamma", gammaEnabled);
+		cube.setInt("Blinn",blinn);
 		//바닥설정
 		glBindVertexArray(planeVAO);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, floor);
+		glBindTexture(GL_TEXTURE_2D, gammaEnabled?floorTextureGammaCorrected:floor);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		if (blinn)
-		{
-			std::cout << "Blinn-Phong\n";
-		}
-		else
-		{
-			std::cout << "Phong\n";
-		}
-
-
+	
 
 
 		//버퍼 스왑하고 io이벤트 체크
@@ -173,8 +182,29 @@ void processInput(GLFWwindow* window)
 		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-		blinn = !blinn;
+	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+	{
+		blinn = false;
+		std::cout << "Phong\n";
+	}
+	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+	{
+		blinn = true;
+		std::cout << "Blinn\n";
+	}
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS &&!gammaKeyPressed)
+	{
+		gammaEnabled = !gammaEnabled;
+		gammaKeyPressed = true;
+		std::cout << "Gamma Enable\n";
+	}
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
+	{
+		gammaKeyPressed = false;
+		
+	}
+
+
 
 }
 
@@ -206,7 +236,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
-unsigned int loadTexture(char const* path)
+unsigned int loadTexture(char const* path,bool gammaCorrection)
 {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
@@ -215,18 +245,25 @@ unsigned int loadTexture(char const* path)
 	if (data)
 	{
 		GLenum format;
+		GLenum internalformat;
 		if (nrComponents == 1)
-			format = GL_RED;
+			internalformat=format = GL_RED;
 		else if (nrComponents == 3)
+		{
+			internalformat = gammaCorrection ? GL_SRGB : GL_RGB;
 			format = GL_RGB;
+		}
 		else if (nrComponents == 4)
+		{
 			format = GL_RGBA;
+			internalformat = gammaCorrection ? GL_SRGB : GL_RGB;
+		}
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height,0, format, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height,0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		stbi_image_free(data);

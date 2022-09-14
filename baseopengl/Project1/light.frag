@@ -8,36 +8,61 @@ in VS_OUT{
 }fs_in;
 
 uniform sampler2D floorTexture;
-uniform vec3 lightPos;
+
+uniform vec3 lightPositions[4];
+uniform vec3 lightColors[4];
 uniform vec3 viewPos;
-uniform bool is_blinn;
+uniform bool gamma;
+uniform bool Blinn;
+vec3 BlinnPhng(vec3 normal,vec3 fragPos,vec3 lightPos,vec3 lightColor)
+{
+	//difuse 설정
+	vec3 lightDir=normalize(lightPos-fragPos);//광원 방향 빛 위치- 프래그 위치
+	float diff=max(dot(lightDir,normal),0.0);
+	vec3 diffuse=diff*lightColor;
+
+	//specular
+	vec3 viewDir=normalize(viewPos-fragPos); // 보는 방향
+	vec3 reflectDir=reflect(-lightDir,normal);
+
+	float spec=0.0;
+	vec3 specular;
+	if(Blinn){
+		vec3 halfwayDir=normalize(lightDir+viewDir);
+		spec=pow(max(dot(normal,halfwayDir),0.0),64.0);
+	    specular=spec+lightColor;
+	}
+	else
+	{
+		spec=pow(max(dot(reflectDir,viewDir),0.0),64.0);
+		specular=spec+lightColor;
+	}
+	//attenuation
+	float max_distance=1.5;
+	float distance=length(lightPos-fragPos);
+	float attenuation=1.0/(gamma?distance*distance:distance);
+
+	diffuse*=attenuation;
+	specular*=attenuation;
+	return diffuse+specular;
+}
+
 
 void main()
 {
 	vec3 color=texture(floorTexture,fs_in.TexCoords).rgb;
-	//ambient
-	vec3 ambient=0.05*color;
-	
-	//diffuse
-	vec3 lightDir=normalize(lightPos-fs_in.FragPos);
-	vec3 normal=normalize(fs_in.Normal);
-	float diff=max(dot(lightDir,normal),0.0);
-	vec3 diffuse=diff*color;
+	vec3 lighting=vec3(0.0);
+	for(int i=0; i<4; i++)
+	{
+		lighting+=BlinnPhng(normalize(fs_in.Normal),fs_in.FragPos,lightPositions[i],lightColors[i]);
+	}
+	color*=lighting;
 
-	//specular
-	vec3 viewDir=normalize(viewPos-fs_in.FragPos);
-	vec3 reflectDir=reflect(-lightDir,normal);
-	float spec=0.0;
-	if(is_blinn)
+	if(gamma)
 	{
-	   vec3 halfwayDir=normalize(lightDir+viewDir);
-	   spec=pow(max(dot(normal,halfwayDir),0.0),32.0);
+		color=pow(color,vec3(1.0/2.2));
 	}
-	else
-	{
-		spec=pow(max(dot(viewDir,reflectDir),0.0),8.0);
-	}
-	vec3 specular=vec3(0.3)*spec;
-	FragColor=vec4(ambient+diffuse+specular,1.0);
+
+	FragColor=vec4(color,1.0);
 
 }
